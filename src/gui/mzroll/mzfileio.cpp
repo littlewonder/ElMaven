@@ -7,6 +7,7 @@
 #endif
 
 mzFileIO::mzFileIO(QWidget*) {
+    sampleId = 0;
     _mainwindow = NULL;
     _stopped = true;
     process = NULL;
@@ -73,6 +74,11 @@ mzSample* mzFileIO::loadSample(QString filename){
     }
 
     if ( sample && sample->scans.size() > 0 ) {
+
+        mtxSampleId.lock();
+        sample->id = ++sampleId;
+        mtxSampleId.unlock();
+
         sample->sampleName = string( sampleName.toLatin1().data() );
         sample->enumerateSRMScans();
 
