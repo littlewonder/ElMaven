@@ -1,4 +1,7 @@
 #include "settingsform.h"
+#include <QProcess>
+#include <QDir>
+#include <QString>
 
 OptionsDialogSettings::OptionsDialogSettings(SettingsForm* dialog): sf(dialog)
 {
@@ -180,6 +183,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     connect(deltaRTCheck, SIGNAL(toggled(bool)), this,SLOT(getFormValues()));
     toggleDeltaRtWeight();
 
+    //msconvert
+    connect(msconvert_start_conversion_button, SIGNAL(clicked()), this, SLOT(startMsconvert()) );
+
     connect(this,&SettingsForm::settingsChanged, odSettings, &OptionsDialogSettings::updateOptionsDialog);
     connect(this, &QDialog::rejected, this, &SettingsForm::dialogRejected);
 }
@@ -346,6 +352,19 @@ void SettingsForm::updateSettingFormGUI() {
 
     if(settings->contains("scan_filter_min_quantile"))
         scan_filter_min_quantile->setValue( settings->value("scan_filter_min_quantile").toInt());
+}
+
+void SettingsForm::startMsconvert() {
+    qDebug() << "IN startMsconvert " << '\n' ;
+    qDebug() << msconvert_file_path->text() << '\n' ;
+    qDebug() << msconvert_output_file_type->currentText() << '\n' ; 
+
+    QProcess *process = new QProcess();
+    process->start("docker run -v " + msconvert_file_path->text() + ":/data -e RAW_FILE_TYPE="+msconvert_input_type->currentText() +" -e OUTPUT_FILE_TYPE="+ msconvert_output_file_type->currentText()+ " kushalgupta/msconvert:0.1");
+    process->waitForFinished();
+    QString strOut = process->readAllStandardOutput();
+    
+    qDebug() << strOut;
 }
 
 
