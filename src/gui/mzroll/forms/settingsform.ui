@@ -23,7 +23,7 @@
    <item row="1" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>10</number>
      </property>
      <widget class="QWidget" name="instrumentationOptions">
       <attribute name="title">
@@ -1344,6 +1344,123 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>MsConvert</string>
+      </attribute>
+      <widget class="QLabel" name="msconvert_input_label">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>50</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Input Data Path</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="msconvert_file_path">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>50</y>
+         <width>451</width>
+         <height>20</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="msconvert_output_label">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>130</y>
+         <width>91</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Output File Type</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="msconvert_output_file_type">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>130</y>
+         <width>211</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>mzXML</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>mzML</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QPushButton" name="msconvert_start_conversion_button">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>170</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Start Conversion</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_27">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>90</y>
+         <width>81</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Input File Type</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="msconvert_input_type">
+       <property name="geometry">
+        <rect>
+         <x>180</x>
+         <y>90</y>
+         <width>211</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <item>
+        <property name="text">
+         <string>D</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>d</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>wiff</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>o</string>
+        </property>
+       </item>
+      </widget>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -1412,6 +1529,11 @@ p, li { white-space: pre-wrap; }
   <tabstop>RawExtractProgram</tabstop>
   <tabstop>RProgramSelect</tabstop>
   <tabstop>Rprogram</tabstop>
+  <tabstop>formulaWithOverlap</tabstop>
+  <tabstop>fetchCompounds</tabstop>
+  <tabstop>formulaWithoutRt</tabstop>
+  <tabstop>formulaWithRt</tabstop>
+  <tabstop>formulaWithoutOverlap</tabstop>
  </tabstops>
  <resources>
   <include location="../mzroll.qrc"/>
