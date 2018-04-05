@@ -27,7 +27,7 @@ if [ $systemType == "linux" ] && [ $flag == 10 ]; then
     genhtml coverage.info --output-directory coverage
 fi
 
-if [ $systemType == "linux" ] && [ -x "$(command -v docker)" ]; then
+if [ -x "$(command -v docker)" ]; then
     echo "Update docker and pull kushalgupta/msconvert:0.1"
     docker pull kushalgupta/msconvert:0.1
     # command
