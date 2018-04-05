@@ -92,7 +92,7 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
     odSettings = new OptionsDialogSettings(this);
 
     connect(tabWidget, SIGNAL(currentChanged(int)), SLOT(getFormValues()));
-
+    connect(resetButton, &QPushButton::clicked, this, &SettingsForm::onReset);
     connect(eic_smoothingWindow, SIGNAL(valueChanged(int)), SLOT(recomputeEIC()));
     connect(eic_smoothingAlgorithm, SIGNAL(currentIndexChanged(int)), SLOT(recomputeEIC()));
     connect(grouping_maxRtWindow, SIGNAL(valueChanged(double)), SLOT(recomputeEIC()));
@@ -208,6 +208,12 @@ void SettingsForm::closeEvent(QCloseEvent* event)
      getFormValues();
     emit updateSettings(odSettings);
      QDialog::closeEvent(event);
+}
+
+void SettingsForm::onReset()
+{
+    qDebug() << "on reset";
+    emit resetSettings();
 }
 
 void SettingsForm::dialogRejected()

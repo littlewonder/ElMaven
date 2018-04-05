@@ -23,6 +23,11 @@ class MavenParameters
         MavenParameters(string settingsPath="");
         ~MavenParameters();
         enum Polarity{AutoDetect,Neutral, Positive, Negative};
+        enum SettingsType {
+            OptionsDialog = 0,
+            PeaksDialog = 1,
+            All = 2
+        };
         boost::signals2::signal< void (const string&,unsigned int , int ) > sig;
 
         /**
@@ -271,12 +276,14 @@ class MavenParameters
          */
         void setOptionsDialogSettings(const char* key, const char* value);
 
-        std::map<string, string>& getSettings();
+        std::pair<std::map<string, string>, std::map<string, string>> getSettings();
+        void resetSettings(const SettingsType& sType);
 
     private:
         char* defaultSettingsData;
         string lastUsedSettingsPath;
-        std::map<string, string> mavenSettings;
+        std::map<string, string> odSettings; // optionsDialog settings
+        std::map<string, string> pdSettings; // peaksDialog settings
 
 
 };

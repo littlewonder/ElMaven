@@ -8,6 +8,8 @@
 #include <sstream>
 #include <cstring>
 
+#include <utility>
+
 MavenParameters::MavenParameters(string settingsPath):lastUsedSettingsPath(settingsPath)
 {
 
@@ -129,10 +131,27 @@ MavenParameters::MavenParameters(string settingsPath):lastUsedSettingsPath(setti
     defaultSettingsData = (char*)default_settings_xml;
 
 
-    /*TODO: find a clean way to implement this. just check if
-    * the 'lastUsedSettingsPath'is not empty and the file
-    * actually exits. If not, then load defaultSettingsData
-    */
+    /** populate the odSettings and pdSettings map first.
+     *  with this we will know which settings belong to options dialog and
+     *  which belongs to peaks dialog before hand
+     **/
+    pugi::xml_document xmlDoc;
+    xmlDoc.load_string(defaultSettingsData);
+
+    pugi::xml_node optionsNode = xmlDoc.child("Settings").child("OptionsDialog");
+    pugi::xml_node peaksNode = xmlDoc.child("Settings").child("PeaksDialog");
+
+    for(pugi::xml_node_iterator it = optionsNode.begin(); it != optionsNode.end(); ++it)
+        odSettings[it->name()] = it->text().get();
+
+    for(pugi::xml_node_iterator it = peaksNode.begin(); it != peaksNode.end(); ++it)
+        pdSettings[it->name()] = it->text().get();
+
+
+    loadSettings(defaultSettingsData);
+
+    // if we have settings in lastRun.xml, load them.
+    // this will replace the default settings that were loaded earlier
     if(!lastUsedSettingsPath.empty()) {
         ifstream ifs(lastUsedSettingsPath, std::ios_base::in);
         if(ifs.is_open()) {
@@ -143,13 +162,7 @@ MavenParameters::MavenParameters(string settingsPath):lastUsedSettingsPath(setti
             }
             ifs.close();
         }
-        else {
-            loadSettings(defaultSettingsData);
-        }
-     }
-
-    else
-        loadSettings(defaultSettingsData);
+    }
 }
 
 MavenParameters::~MavenParameters()
@@ -157,9 +170,9 @@ MavenParameters::~MavenParameters()
     saveSettings(lastUsedSettingsPath.c_str());
 }
 
-std::map<string, string>& MavenParameters::getSettings()
+std::pair<std::map<string, string>, std::map<string, string>> MavenParameters::getSettings()
 {
-    return mavenSettings;
+    return std::make_pair(odSettings, pdSettings);
 }
 
 void  MavenParameters::setPeakDetectionSettings(const char* key, const char* value)
@@ -167,7 +180,14 @@ void  MavenParameters::setPeakDetectionSettings(const char* key, const char* val
     if(key[0] == '\0' || value[0] == '\0')
         return;
 
-    mavenSettings[const_cast<char*>(key)] = const_cast<char*>(value);
+    /* NOTE
+     * Key and value received can be from any of the dialogs(peaksDialog, optionsDialog)
+     * hence before updating the map, pdSettings, we need to make sure that it's one
+     * of the peaks dialog settings
+     */
+
+    if(pdSettings.find(key) != pdSettings.end())
+        pdSettings[const_cast<char*>(key)] = const_cast<char*>(value);
 
 
     if(strcmp(key, "automatedDetection") == 0 )
@@ -188,12 +208,9 @@ void  MavenParameters::setPeakDetectionSettings(const char* key, const char* val
 
 
      if(strcmp(key, "massCutoffMerge") == 0 ) {
-
-
          if(massCutoffMerge != nullptr) {
              massCutoffMerge->setMassCutoff(atof(value));
          }
-
      }
 
 
@@ -293,12 +310,18 @@ void MavenParameters::setOptionsDialogSettings(const char* key, const char* valu
     if(key[0] == '\0' || value[0] == '\0')
         return;
 
-    mavenSettings[const_cast<char*>(key)] = const_cast<char*>(value);
+    /* NOTE
+     * Key and value received can be from any of the dialogs(peaksDialog, optionsDialog)
+     * hence before updating the map, odSettings, we need to make sure that it's one
+     * of the options dialog settings
+     */
 
-    if(strcmp(key, "ionizationMode") == 0){
+    if(odSettings.find(key) != odSettings.end())
+        odSettings[const_cast<char*>(key)] = const_cast<char*>(value);
+
+    if(strcmp(key, "ionizationMode") == 0) {
         int polarity=atoi(value);
         setIonizationMode((Polarity)polarity);
-
     }
 
     if(strcmp(key, "amuQ1") == 0)
@@ -424,12 +447,19 @@ bool MavenParameters::saveSettings(const char* path)
     pugi::xml_document xmlDoc;
 
     pugi::xml_node pNode = xmlDoc.append_child("Settings");
+    pugi::xml_node peaksNode = pNode.append_child("PeaksDialog");
+    pugi::xml_node optionsNode = pNode.append_child("OptionsDialog");
 
 
 
-    for(std::map<std::string, std::string>::iterator  it = mavenSettings.begin(); it != mavenSettings.end(); it++) {
+    for(std::map<std::string, std::string>::iterator  it = odSettings.begin(); it != odSettings.end(); it++) {
+        pugi::xml_node cNode = optionsNode.append_child(it->first.c_str());
+        cNode.append_child(pugi::node_pcdata).set_value(it->second.c_str());
+    }
 
-        pugi::xml_node cNode = pNode.append_child(it->first.c_str());
+    for(std::map<std::string, std::string>::iterator  it = pdSettings.begin(); it != pdSettings.end(); it++) {
+
+        pugi::xml_node cNode = peaksNode.append_child(it->first.c_str());
         cNode.append_child(pugi::node_pcdata).set_value(it->second.c_str());
 
     }
@@ -455,14 +485,58 @@ bool MavenParameters::loadSettings(const char* data)
     }
 
     pugi::xml_node pnode = xmlDoc.child("Settings");
+    pugi::xml_node optionsNode = pnode.child("OptionsDialog");
+    pugi::xml_node peaksNode = pnode.child("PeaksDialog");
 
-    for(pugi::xml_node_iterator it = pnode.begin(); it != pnode.end(); ++it) {
+    if(!optionsNode.empty() && !peaksNode.empty()) {
 
-                setPeakDetectionSettings(it->name(), it->text().get());
-                setOptionsDialogSettings(it->name(), it->text().get());
+        for(pugi::xml_node_iterator it = optionsNode.begin(); it != optionsNode.end(); ++it){
+            setOptionsDialogSettings(it->name(), it->text().get());
+        }
+
+        for(pugi::xml_node_iterator it = peaksNode.begin(); it != peaksNode.end(); ++it)
+            setPeakDetectionSettings(it->name(), it->text().get());
+    }
+
+    else {
+
+        // this is done just to maintain the backward compatibility of lastRun.xml
+        for(pugi::xml_node_iterator it = pnode.begin(); it != pnode.end(); ++it) {
+            setPeakDetectionSettings(it->name(), it->text().get());
+            setOptionsDialogSettings(it->name(), it->text().get());
+        }
     }
 
     return true;
+}
+
+void MavenParameters::resetSettings(const SettingsType &type)
+{
+    pugi::xml_document xmlDoc;
+    xmlDoc.load_string(defaultSettingsData);
+
+    switch(type) {
+
+        case PeaksDialog: {
+            pugi::xml_node childNode = xmlDoc.child("Settings").child("PeaksDialog");
+            for(pugi::xml_node_iterator it = childNode.begin(); it != childNode.end(); ++it)
+                setPeakDetectionSettings(it->name(), it->text().get());
+
+            break;
+        }
+
+        case OptionsDialog: {
+            pugi::xml_node childNode = xmlDoc.child("Settings").child("OptionsDialog");
+            for(pugi::xml_node_iterator it = childNode.begin(); it != childNode.end(); ++it)
+                setOptionsDialogSettings(it->name(), it->text().get());
+            break;
+        }
+
+        case All: {
+            break;
+        }
+        default: break;
+    }
 }
 
 vector<mzSample*> MavenParameters::getVisibleSamples() {

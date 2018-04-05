@@ -66,11 +66,14 @@ class SettingsForm : public QDialog, public Ui_SettingsForm
             inline void setQ1Tollrance(double value) { setNumericValue("amuQ1",value); }
             inline void setQ3Tollrance(double value) { setNumericValue("amuQ3",value); }
 
+            void onReset();
+
 
 
     Q_SIGNALS:
         void settingsChanged(string key, string value);
         void updateSettings(OptionsDialogSettings* od);
+        void resetSettings();
 
 
       private:

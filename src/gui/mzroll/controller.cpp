@@ -11,12 +11,22 @@ Controller::Controller()
     connect(mw->peakDetectionDialog, &PeakDetectionDialog::updateSettings, this, &Controller::updatePeakDetectionSettings);
     connect(mw->settingsForm, &SettingsForm::updateSettings,this,&Controller::updateOptionsDialogSettings);
     connect(mw,  &MainWindow::loadedSettings, this, &Controller::updateUi);
+    connect(mw->settingsForm,&SettingsForm::resetSettings,this, &Controller::resetOptionsDialog);
+
 }
 
 
 Controller::~Controller()
 {
     delete mw;
+}
+
+
+void Controller::resetOptionsDialog()
+{
+
+    mw->mavenParameters->resetSettings(mw->mavenParameters->SettingsType::OptionsDialog);
+    updateUi();
 }
 
 template <typename T>
@@ -84,12 +94,15 @@ void Controller::updatePeakDetectionSettings(PeakDetectionSettings* pd)
 
 void Controller::updateUi()
 {
-    std::map<std::string, std::string>& mavenSettings = mw->mavenParameters->getSettings();
+    auto settings = mw->mavenParameters->getSettings();
+    auto odSettings = settings.first;
+    auto pdSettings = settings.second;
 
-    for(std::map<std::string, std::string>::iterator  it = mavenSettings.begin(); it != mavenSettings.end(); it++) {
-        emit mw->peakDetectionDialog->settingsChanged(it->first, it->second);
+    for(std::map<std::string, std::string>::iterator  it = odSettings.begin(); it != odSettings.end(); it++)
         emit mw->settingsForm->settingsChanged(it->first, it->second);
-    }
+
+    for(std::map<std::string, std::string>::iterator  it = pdSettings.begin(); it != pdSettings.end(); it++)
+        emit mw->peakDetectionDialog->settingsChanged(it->first, it->second);
 }
 
 void Controller::updateMavenParameters(const QString& key,  const QVariant& value)
