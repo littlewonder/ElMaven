@@ -185,6 +185,9 @@ SettingsForm::SettingsForm(QSettings* s, MainWindow *w): QDialog(w) {
 
     //msconvert
     connect(msconvert_start_conversion_button, SIGNAL(clicked()), this, SLOT(startMsconvert()) );
+    connect(msconvertInputPath, SIGNAL(clicked()), SLOT(selectMsconvertInputPath()));
+    //Bash Script to remove start and end from mzML/mzXML files
+    connect(bashScriptButton, SIGNAL(clicked()), this, SLOT(applyRegularExpScript()) );
 
     connect(this,&SettingsForm::settingsChanged, odSettings, &OptionsDialogSettings::updateOptionsDialog);
     connect(this, &QDialog::rejected, this, &SettingsForm::dialogRejected);
@@ -358,6 +361,15 @@ void SettingsForm::startMsconvert() {
     qDebug() << "IN startMsconvert " << '\n' ;
     qDebug() << msconvert_file_path->text() << '\n' ;
     qDebug() << msconvert_output_file_type->currentText() << '\n' ; 
+    qDebug() << msconvert_file_path->text().isEmpty() << '\n';
+
+    if( (msconvert_file_path->text().isEmpty()) ) {
+        qDebug() << "File path required." << '\n';
+        return;
+    }
+    else {
+        qDebug() << "File path has value" << '\n';
+    }
 
     QProcess *process = new QProcess();
     process->start("docker run -v " + msconvert_file_path->text() + ":/data -e RAW_FILE_TYPE="+msconvert_input_type->currentText() +" -e OUTPUT_FILE_TYPE="+ msconvert_output_file_type->currentText()+ " kushalgupta/msconvert:0.1");
@@ -365,6 +377,28 @@ void SettingsForm::startMsconvert() {
     QString strOut = process->readAllStandardOutput();
     
     qDebug() << strOut;
+    return;
+}
+
+void SettingsForm::applyRegularExpScript() {
+    qDebug() << "IN applyRegularExpScript " << '\n' ;
+    qDebug() << scriptPathInput->text() << '\n' ;
+
+    if( (scriptPathInput->text().isEmpty()) ) {
+        qDebug() << "File path required." << '\n';
+        return;
+    }
+    else {
+        qDebug() << "File path has value" << '\n';
+    }
+
+    QProcess *process = new QProcess();
+    process->start( scriptPathInput->text() );
+    process->waitForFinished();
+    QString strOut = process->readAllStandardOutput();
+    
+    qDebug() << strOut;
+    return;
 }
 
 
@@ -486,6 +520,16 @@ void SettingsForm::selectFolder(QString key) {
     if (! newFolder.isEmpty()) {
         settings->setValue(key,newFolder);
         updateSettingFormGUI();
+    }
+}
+
+
+void SettingsForm::selectMsconvertInputFolder(QString key) {
+    QString oFolder = ".";
+    if(settings->contains(key)) oFolder =  settings->value(key).toString();
+    QString newFolder = QFileDialog::getExistingDirectory(this,oFolder);
+    if (! newFolder.isEmpty()) {
+        msconvert_file_path->setText(newFolder);
     }
 }
 
