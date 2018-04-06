@@ -170,7 +170,7 @@ MavenParameters::~MavenParameters()
     saveSettings(lastUsedSettingsPath.c_str());
 }
 
-std::pair<std::map<string, string>, std::map<string, string>> MavenParameters::getSettings()
+pairMap MavenParameters::getSettings()
 {
     return std::make_pair(odSettings, pdSettings);
 }

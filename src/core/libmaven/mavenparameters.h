@@ -16,6 +16,7 @@
 #include "masscutofftype.h"
 #include "classifierNeuralNet.h"
 
+typedef std::pair<std::map<std::string, std::string>, std::map<std::string, std::string>> pairMap;
 
 class MavenParameters 
 {
@@ -276,7 +277,7 @@ class MavenParameters
          */
         void setOptionsDialogSettings(const char* key, const char* value);
 
-        std::pair<std::map<string, string>, std::map<string, string>> getSettings();
+        pairMap getSettings();
         void resetSettings(const SettingsType& sType);
 
     private:
