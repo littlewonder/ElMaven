@@ -993,6 +993,13 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="resetButton">
+        <property name="text">
+         <string>Restore defaults</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

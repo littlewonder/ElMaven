@@ -122,6 +122,7 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
 
 
         connect(computeButton, SIGNAL(clicked(bool)), SLOT(findPeaks()));
+        connect(resetButton, &QPushButton::clicked, this, &PeakDetectionDialog::onReset);
         connect(cancelButton, SIGNAL(clicked(bool)), SLOT(cancel()));
         connect(setOutputDirButton, SIGNAL(clicked(bool)), SLOT(setOutputDir()));
         connect(matchRt,SIGNAL(clicked(bool)),compoundRTWindow,SLOT(setEnabled(bool))); //TODO: Sahil - Kiran, Added while merging mainwindow
@@ -156,6 +157,11 @@ PeakDetectionDialog::PeakDetectionDialog(QWidget *parent) :
 
 }
 
+
+void PeakDetectionDialog::onReset()
+{
+    emit resetSettings();
+}
 
 void PeakDetectionDialog::setMassCutoffType(QString type)
 {

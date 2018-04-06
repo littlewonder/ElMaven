@@ -12,6 +12,7 @@ Controller::Controller()
     connect(mw->settingsForm, &SettingsForm::updateSettings,this,&Controller::updateOptionsDialogSettings);
     connect(mw,  &MainWindow::loadedSettings, this, &Controller::updateUi);
     connect(mw->settingsForm,&SettingsForm::resetSettings,this, &Controller::resetOptionsDialog);
+    connect(mw->peakDetectionDialog, &PeakDetectionDialog::resetSettings, this, &Controller::resetPeaksDialog);
 
 }
 
@@ -19,6 +20,13 @@ Controller::Controller()
 Controller::~Controller()
 {
     delete mw;
+}
+
+void Controller::resetPeaksDialog()
+{
+
+    mw->mavenParameters->resetSettings(mw->mavenParameters->SettingsType::PeaksDialog);
+    updateUi();
 }
 
 

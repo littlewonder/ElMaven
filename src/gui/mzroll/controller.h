@@ -18,6 +18,7 @@ class Controller:  public QObject
       void updateOptionsDialogSettings(OptionsDialogSettings* od);
       void updateUi();
       void resetOptionsDialog();
+      void resetPeaksDialog();
 
 
     private:
